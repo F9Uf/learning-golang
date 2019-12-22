@@ -1,3 +1,5 @@
 go mod init {project_name}
 
 go get {module_name}
+
+go build {filename.go}

@@ -1,35 +1,64 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	// :8080 => 0.0.0.0:8080
-	http.ListenAndServe(":8080", http.HandlerFunc(handler))
+	e := echo.New()
+	e.POST("/add", addHandler)
+	e.POST("/mul", mulHandler)
+	e.Start(":8080")
 }
 
 type addRequest struct {
-	A int `json:"x"`
-	B int `json:"y"`
+	A int
+	B int
 }
 
 type addResponse struct {
-	Result int `json:"res,omitempty"`
+	Result int `json:"res"`
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	// pare request
+func addHandler(c echo.Context) error {
+	// parse request
 	var reqBody addRequest
-	json.NewDecoder(r.Body).Decode(&reqBody)
+	err := c.Bind(&reqBody)
+	if err != nil {
+		return err
+	}
 
 	// calculate
 	result := reqBody.A + reqBody.B
 
 	// send response
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(addResponse{
+	return c.JSON(200, addResponse{
+		Result: result,
+	})
+}
+
+type mulRequest struct {
+	A int
+	B int
+}
+
+type mulResponse struct {
+	Result int `json:"res"`
+}
+
+func mulHandler(c echo.Context) error {
+	// parse request
+	var reqBody mulRequest
+	err := c.Bind(&reqBody)
+	if err != nil {
+		return err
+	}
+
+	// calculate
+	result := reqBody.A * reqBody.B
+
+	// send response
+	return c.JSON(200, mulResponse{
 		Result: result,
 	})
 }

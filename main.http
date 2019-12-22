@@ -1,6 +1,7 @@
-POST http://localhost:8080
+POST http://localhost:8080/mul
+Content-Type: application/json
 
 {
-  "x": 10,
-  "y": 20
+  "a": 10,
+  "b": 21
 }
