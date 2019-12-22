@@ -1,9 +1,8 @@
 package main
 
 import (
-	"html/template"
+	"encoding/json"
 	"net/http"
-	"strconv"
 )
 
 func main() {
@@ -11,43 +10,26 @@ func main() {
 	http.ListenAndServe(":8080", http.HandlerFunc(handler))
 }
 
-var indexTmpl = template.Must(template.New("").Parse(`
-<!doctype html>
-<title>Calculator</title>
-<h1>Calculator</h1>
+type addRequest struct {
+	A int `json:"x"`
+	B int `json:"y"`
+}
 
-<form method=POST>
-    <input name=a type="number">
-    <input name=b type="number">
-    <button>+</button>
-</form>
-
-{{if .}}
-<p>Result: {{.A}} + {{.B}} = {{.Result}} </p>
-{{end}}
-`))
-
-type indexData struct {
-	A      int
-	B      int
-	Result int
+type addResponse struct {
+	Result int `json:"res,omitempty"`
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		a, _ := strconv.Atoi(r.PostFormValue("a"))
-		b, _ := strconv.Atoi(r.PostFormValue("b"))
+	// pare request
+	var reqBody addRequest
+	json.NewDecoder(r.Body).Decode(&reqBody)
 
-		result := a + b
-		w.Header().Set("Content-Type", "text/html")
-		indexTmpl.Execute(w, indexData{
-			A:      a,
-			B:      b,
-			Result: result,
-		})
-		return
-	}
+	// calculate
+	result := reqBody.A + reqBody.B
 
-	w.Header().Set("Content-Type", "text/html")
-	indexTmpl.Execute(w, nil)
+	// send response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(addResponse{
+		Result: result,
+	})
 }
