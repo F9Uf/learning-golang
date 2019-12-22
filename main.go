@@ -4,7 +4,11 @@ import "net/http"
 
 func main() {
 	// :8080 => 0.0.0.0:8080
-	http.ListenAndServe(":8080", http.HandlerFunc(router))
+	m := http.NewServeMux()
+	m.Handle("/", http.HandlerFunc(indexHandler))
+	m.Handle("/about", http.HandlerFunc(aboutHandler))
+
+	http.ListenAndServe(":8080", m)
 }
 
 // http Handler
